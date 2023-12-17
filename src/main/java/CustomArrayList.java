@@ -73,7 +73,6 @@ public class CustomArrayList<E> {
         quickSort((E[]) array, c);
     }
 
-    @SuppressWarnings("unchecked")
     private void quickSort(E[] arr, Comparator<? super E> c) {
         quickSort(arr, 0, size - 1, c);
     }
