@@ -1,19 +1,25 @@
 package jdbc.dao;
 
+import static jdbc.Main.*;
 import jdbc.dto.UserRequestDto;
 import jdbc.model.User;
 
 import java.sql.*;
-import java.util.*;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Optional;
 
 public class UserDaoImpl implements UserDao {
 
-    private static final String URL = "jdbc:postgresql://localhost:5432/aston";
-    private static final String USER = "user";
-    private static final String PASSWORD = "password";
 
     public UserDaoImpl() {
-        try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD)) {
+        try {
+            Class.forName("org.postgresql.Driver");
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+        try (Connection connection = DriverManager.getConnection(POSTRESQL_URL, USER, PASSWORD)) {
             String sql = """
                     drop table if exists users cascade;
                                         
@@ -22,6 +28,9 @@ public class UserDaoImpl implements UserDao {
                     	first_name varchar(255) not null,
                     	second_name varchar(255) not null
                     );
+                    
+                    insert into users (first_name, second_name) values ('arthur','inzhilov');
+                    insert into users (first_name, second_name) values ('tom','anderson');
                     """;
             Statement statement = connection.createStatement();
             statement.execute(sql);
@@ -33,16 +42,16 @@ public class UserDaoImpl implements UserDao {
     @Override
     public List<User> getUsers() {
         List<User> users = new LinkedList<>();
-        try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD)) {
+        try (Connection connection = DriverManager.getConnection(POSTRESQL_URL, USER, PASSWORD)) {
             Statement statement = connection.createStatement();
             String sql = "select * from users order by user_id asc;";
             ResultSet resultSet = statement.executeQuery(sql);
             while (resultSet.next()) {
-                int id = resultSet.getInt(1);
-                String firstName = resultSet.getString(2);
-                String secondName = resultSet.getString(3);
+                int userId = resultSet.getInt("user_id");
+                String firstName = resultSet.getString("first_name");
+                String secondName = resultSet.getString("second_name");
                 users.add(User.builder()
-                        .userId(id)
+                        .userId(userId)
                         .firstName(firstName)
                         .secondName(secondName).build());
             }
@@ -56,7 +65,7 @@ public class UserDaoImpl implements UserDao {
     @Override
     public Optional<User> getUserById(Integer userId) {
         User user = null;
-        try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD)) {
+        try (Connection connection = DriverManager.getConnection(POSTRESQL_URL, USER, PASSWORD)) {
             String sql = "select * from users where user_id = ?;";
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setInt(1, userId);
@@ -77,15 +86,20 @@ public class UserDaoImpl implements UserDao {
 
     @Override
     public Optional<User> createUser(UserRequestDto userRequestDto) {
-        try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD)) {
+        try (Connection connection = DriverManager.getConnection(POSTRESQL_URL, USER, PASSWORD)) {
             String sql = "INSERT INTO users (first_name, second_name) VALUES (?, ?);";
             PreparedStatement preparedStatement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
             preparedStatement.setString(1, userRequestDto.firstName());
             preparedStatement.setString(2, userRequestDto.secondName());
             preparedStatement.executeUpdate();
             ResultSet resultSet = preparedStatement.getGeneratedKeys();
-            int id = resultSet.getInt(1);
-            return getUserById(id);
+            if (resultSet.next()) {
+                int id = resultSet.getInt(1);
+                return getUserById(id);
+            }
+            else {
+                return Optional.empty();
+            }
         } catch (SQLException e) {
             e.printStackTrace();
             return Optional.empty();
@@ -94,7 +108,7 @@ public class UserDaoImpl implements UserDao {
 
     @Override
     public Optional<User> updateUser(Integer userId, UserRequestDto userRequestDto) {
-        try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD)) {
+        try (Connection connection = DriverManager.getConnection(POSTRESQL_URL, USER, PASSWORD)) {
             String sql = "update users set first_name = ?, second_name = ? where user_id = ?;";
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setString(1, userRequestDto.firstName());
@@ -110,10 +124,11 @@ public class UserDaoImpl implements UserDao {
 
     @Override
     public boolean deleteUser(Integer userId) {
-        try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD)) {
+        try (Connection connection = DriverManager.getConnection(POSTRESQL_URL, USER, PASSWORD)) {
             String sql = "delete from users where user_id = ?;";
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setInt(1, userId);
+            preparedStatement.executeUpdate();
             return true;
         } catch (SQLException e) {
             e.printStackTrace();

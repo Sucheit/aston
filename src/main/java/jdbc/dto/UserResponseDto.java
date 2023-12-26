@@ -1,4 +1,4 @@
 package jdbc.dto;
 
-public record UserResponseDto(Integer id, String firstName, String secondName) {
+public record UserResponseDto(String userId, String firstName, String secondName) {
 }
