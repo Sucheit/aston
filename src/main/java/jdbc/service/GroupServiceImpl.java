@@ -3,8 +3,10 @@ package jdbc.service;
 import jdbc.dao.GroupDao;
 import jdbc.dto.GroupRequestDto;
 import jdbc.dto.GroupResponseDto;
+import jdbc.dto.UserResponseDto;
 import jdbc.exceptions.NotFoundException;
 import jdbc.mappers.GroupMapper;
+import jdbc.mappers.UserMapper;
 import jdbc.model.Group;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -19,6 +21,8 @@ public class GroupServiceImpl implements GroupService {
     GroupDao groupDao;
 
     GroupMapper groupMapper;
+
+    UserMapper userMapper;
 
     @Override
     public List<GroupResponseDto> getGroups() {
@@ -53,5 +57,12 @@ public class GroupServiceImpl implements GroupService {
         groupDao.getGroupById(groupId)
                 .orElseThrow(() -> new NotFoundException(String.format("Group id=%s not found", groupId)));
         return groupDao.deleteGroup(groupId);
+    }
+
+    @Override
+    public List<UserResponseDto> getGroupUsers(Integer groupId) {
+        groupDao.getGroupById(groupId)
+                .orElseThrow(() -> new NotFoundException(String.format("Group id=%s not found", groupId)));
+        return userMapper.userListToUserResponseDtoList(groupDao.getGroupUsers(groupId));
     }
 }

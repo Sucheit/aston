@@ -1,9 +1,11 @@
 package jdbc.service;
 
 import jdbc.dao.UserDao;
+import jdbc.dto.GroupResponseDto;
 import jdbc.dto.UserRequestDto;
 import jdbc.dto.UserResponseDto;
 import jdbc.exceptions.NotFoundException;
+import jdbc.mappers.GroupMapper;
 import jdbc.mappers.UserMapper;
 import jdbc.model.User;
 import lombok.AccessLevel;
@@ -19,6 +21,8 @@ public class UserServiceImpl implements UserService {
     UserDao userDao;
 
     UserMapper userMapper;
+
+    GroupMapper groupMapper;
 
     @Override
     public List<UserResponseDto> getUsers() {
@@ -53,5 +57,26 @@ public class UserServiceImpl implements UserService {
         userDao.getUserById(userId)
                 .orElseThrow(() -> new NotFoundException(String.format("User id=%s not found", userId)));
         return userDao.deleteUser(userId);
+    }
+
+    @Override
+    public List<GroupResponseDto> getUserGroups(Integer userId) {
+        userDao.getUserById(userId)
+                .orElseThrow(() -> new NotFoundException(String.format("User id=%s not found", userId)));
+        return groupMapper.groupListToGroupResponseDtoList(userDao.getUserGroups(userId));
+    }
+
+    @Override
+    public boolean addUserToGroup(Integer userId, Integer groupId) {
+        userDao.getUserById(userId)
+                .orElseThrow(() -> new NotFoundException(String.format("User id=%s not found", userId)));
+        return userDao.addUserToGroup(userId, groupId);
+    }
+
+    @Override
+    public boolean deleteUserFromGroup(Integer userId, Integer groupId) {
+        userDao.getUserById(userId)
+                .orElseThrow(() -> new NotFoundException(String.format("User id=%s not found", userId)));
+        return userDao.deleteUserFromGroup(userId, groupId);
     }
 }

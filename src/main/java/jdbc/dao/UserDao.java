@@ -1,6 +1,7 @@
 package jdbc.dao;
 
 import jdbc.dto.UserRequestDto;
+import jdbc.model.Group;
 import jdbc.model.User;
 
 import java.util.List;
@@ -17,4 +18,10 @@ public interface UserDao {
     Optional<User> updateUser(Integer userId, UserRequestDto userRequestDto);
 
     boolean deleteUser(Integer userId);
+
+    List<Group> getUserGroups(Integer userId);
+
+    boolean addUserToGroup(Integer userId, Integer groupId);
+
+    boolean deleteUserFromGroup(Integer userId, Integer groupId);
 }

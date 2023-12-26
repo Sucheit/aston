@@ -1,6 +1,7 @@
 package jdbc.servlets;
 
 import com.google.gson.Gson;
+import jdbc.dto.GroupResponseDto;
 import jdbc.dto.UserRequestDto;
 import jdbc.dto.UserResponseDto;
 import jdbc.exceptions.NotFoundException;
@@ -40,30 +41,38 @@ public class UserServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
-
         resp.setContentType("application/json");
         resp.setCharacterEncoding("UTF-8");
-
         var mapping = req.getHttpServletMapping();
-        String gson = switch (mapping.getPattern()) {
-            case "/users/*" -> {
-                Integer userId = Integer.parseInt(mapping.getMatchValue());
-                UserResponseDto userResponseDto;
+        String gsonString = "Invalid URL";
+        String pattern = mapping.getPattern();
+        if (pattern.equals("/users/*")) {
+            String[] strings = mapping.getMatchValue().split("/");
+            Integer userId = Integer.parseInt(strings[0]);
+            if (strings.length == 1) {
+                UserResponseDto userResponseDto = null;
                 try {
                     userResponseDto = userService.getUserById(userId);
                 } catch (NotFoundException e) {
                     resp.sendError(404, e.getMessage());
-                    yield e.getMessage();
                 }
-                yield this.gson.toJson(userResponseDto);
+                gsonString = gson.toJson(userResponseDto);
             }
-            case "/users" -> {
-                List<UserResponseDto> users = userService.getUsers();
-                yield this.gson.toJson(users);
+            if (strings.length == 2) {
+                List<GroupResponseDto> groupResponseDtos = null;
+                try {
+                    groupResponseDtos = userService.getUserGroups(userId);
+                } catch (NotFoundException e) {
+                    resp.sendError(404, e.getMessage());
+                }
+                gsonString = gson.toJson(groupResponseDtos);
             }
-            default -> "Invalid URL";
-        };
-        resp.getWriter().write(gson);
+        } else if (pattern.equals("/users")) {
+            List<UserResponseDto> users = userService.getUsers();
+            gsonString = gson.toJson(users);
+        }
+
+        resp.getWriter().write(gsonString);
     }
 
     @Override
@@ -72,13 +81,20 @@ public class UserServlet extends HttpServlet {
         resp.setCharacterEncoding("UTF-8");
         var mapping = req.getHttpServletMapping();
         String gsonString = "Invalid URL";
+        String groupIdStr = req.getParameter("groupId");
         if (mapping.getPattern().equals("/users/*")) {
             Integer userId = Integer.parseInt(mapping.getMatchValue());
-            try {
-                userService.deleteUser(userId);
-                gsonString = "User deleted";
-            } catch (NotFoundException e) {
-                resp.sendError(404, e.getMessage());
+            if (groupIdStr == null) {
+                try {
+                    userService.deleteUser(userId);
+                    gsonString = "User deleted";
+                } catch (NotFoundException e) {
+                    resp.sendError(404, e.getMessage());
+                }
+            } else {
+                Integer groupId = Integer.parseInt(groupIdStr);
+                userService.deleteUserFromGroup(userId, groupId);
+                gsonString = String.format("User id=%s deleted from group id=%s", userId, groupId);
             }
         }
         resp.getWriter().write(gsonString);
@@ -88,12 +104,24 @@ public class UserServlet extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         resp.setContentType("application/json");
         resp.setCharacterEncoding("UTF-8");
-        String body = req.getReader()
-                .lines()
-                .collect(Collectors.joining(System.lineSeparator()));
-        UserRequestDto userRequestDto = gson.fromJson(body, UserRequestDto.class);
-        UserResponseDto userResponseDto = userService.createUser(userRequestDto);
-        String gsonString = gson.toJson(userResponseDto);
+        String gsonString;
+        var mapping = req.getHttpServletMapping();
+        String pattern = mapping.getPattern();
+        if (pattern.equals("/users")) {
+            String body = req.getReader()
+                    .lines()
+                    .collect(Collectors.joining(System.lineSeparator()));
+            UserRequestDto userRequestDto = gson.fromJson(body, UserRequestDto.class);
+            UserResponseDto userResponseDto = userService.createUser(userRequestDto);
+            gsonString = gson.toJson(userResponseDto);
+        } else if (pattern.equals("/users/*")) {
+            Integer groupId = Integer.parseInt(req.getParameter("groupId"));
+            Integer userId = Integer.parseInt(mapping.getMatchValue());
+            userService.addUserToGroup(userId, groupId);
+            gsonString = String.format("User id=%s added to group id=%s", userId, groupId);
+        } else {
+            gsonString = "Invalid URL";
+        }
         resp.getWriter().write(gsonString);
     }
 

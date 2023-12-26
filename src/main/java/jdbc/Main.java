@@ -14,10 +14,6 @@ import org.mapstruct.factory.Mappers;
 
 public class Main {
 
-    public static final String POSTRESQL_URL = "jdbc:postgresql://localhost:5432/aston";
-    public static final String USER = "user";
-    public static final String PASSWORD = "password";
-
     public static void main(String[] args) {
     }
 
@@ -26,7 +22,7 @@ public class Main {
     }
 
     public static UserService getUserService(UserDao userDao) {
-        return new UserServiceImpl(userDao, Mappers.getMapper(UserMapper.class));
+        return new UserServiceImpl(userDao, Mappers.getMapper(UserMapper.class), Mappers.getMapper(GroupMapper.class));
     }
 
     public static GroupDao getGroupDao() {
@@ -34,6 +30,6 @@ public class Main {
     }
 
     public static GroupService getGroupService(GroupDao groupDao) {
-        return new GroupServiceImpl(groupDao, Mappers.getMapper(GroupMapper.class));
+        return new GroupServiceImpl(groupDao, Mappers.getMapper(GroupMapper.class), Mappers.getMapper(UserMapper.class));
     }
 }
