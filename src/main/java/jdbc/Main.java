@@ -1,16 +1,16 @@
 package jdbc;
 
+import jdbc.dao.GroupDao;
+import jdbc.dao.GroupDaoImpl;
 import jdbc.dao.UserDao;
 import jdbc.dao.UserDaoImpl;
+import jdbc.mappers.GroupMapper;
 import jdbc.mappers.UserMapper;
+import jdbc.service.GroupService;
+import jdbc.service.GroupServiceImpl;
 import jdbc.service.UserService;
 import jdbc.service.UserServiceImpl;
 import org.mapstruct.factory.Mappers;
-
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
 
 public class Main {
 
@@ -29,4 +29,11 @@ public class Main {
         return new UserServiceImpl(userDao, Mappers.getMapper(UserMapper.class));
     }
 
+    public static GroupDao getGroupDao() {
+        return new GroupDaoImpl();
+    }
+
+    public static GroupService getGroupService(GroupDao groupDao) {
+        return new GroupServiceImpl(groupDao, Mappers.getMapper(GroupMapper.class));
+    }
 }

@@ -1,10 +1,10 @@
 package jdbc.servlets;
 
 import com.google.gson.Gson;
-import jdbc.dto.UserRequestDto;
-import jdbc.dto.UserResponseDto;
+import jdbc.dto.GroupRequestDto;
+import jdbc.dto.GroupResponseDto;
 import jdbc.exceptions.NotFoundException;
-import jdbc.service.UserService;
+import jdbc.service.GroupService;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -18,15 +18,15 @@ import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static jdbc.Main.getUserDao;
-import static jdbc.Main.getUserService;
+import static jdbc.Main.getGroupDao;
+import static jdbc.Main.getGroupService;
 
-@WebServlet(urlPatterns = {"/users", "/users/*"})
+@WebServlet(urlPatterns = {"/groups", "/groups/*"})
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class UserServlet extends HttpServlet {
+public class GroupServlet extends HttpServlet {
 
-    UserService userService;
+    GroupService groupService;
 
     Gson gson;
 
@@ -34,32 +34,31 @@ public class UserServlet extends HttpServlet {
     public void init() throws ServletException {
         super.init();
         gson = new Gson();
-        userService = getUserService(getUserDao());
+        groupService = getGroupService(getGroupDao());
     }
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
-
         resp.setContentType("application/json");
         resp.setCharacterEncoding("UTF-8");
 
         var mapping = req.getHttpServletMapping();
         String gson = switch (mapping.getPattern()) {
-            case "/users/*" -> {
-                Integer userId = Integer.parseInt(mapping.getMatchValue());
-                UserResponseDto userResponseDto;
+            case "/groups/*" -> {
+                Integer groupId = Integer.parseInt(mapping.getMatchValue());
+                GroupResponseDto groupResponseDto;
                 try {
-                    userResponseDto = userService.getUserById(userId);
+                    groupResponseDto = groupService.getGroupById(groupId);
                 } catch (NotFoundException e) {
                     resp.sendError(404, e.getMessage());
                     yield e.getMessage();
                 }
-                yield this.gson.toJson(userResponseDto);
+                yield this.gson.toJson(groupResponseDto);
             }
-            case "/users" -> {
-                List<UserResponseDto> users = userService.getUsers();
-                yield this.gson.toJson(users);
+            case "/groups" -> {
+                List<GroupResponseDto> groups = groupService.getGroups();
+                yield this.gson.toJson(groups);
             }
             default -> "Invalid URL";
         };
@@ -72,11 +71,11 @@ public class UserServlet extends HttpServlet {
         resp.setCharacterEncoding("UTF-8");
         var mapping = req.getHttpServletMapping();
         String gsonString = "Invalid URL";
-        if (mapping.getPattern().equals("/users/*")) {
-            Integer userId = Integer.parseInt(mapping.getMatchValue());
+        if (mapping.getPattern().equals("/groups/*")) {
+            Integer groupId = Integer.parseInt(mapping.getMatchValue());
             try {
-                userService.deleteUser(userId);
-                gsonString = "User deleted";
+                groupService.deleteGroup(groupId);
+                gsonString = "Group deleted";
             } catch (NotFoundException e) {
                 resp.sendError(404, e.getMessage());
             }
@@ -91,9 +90,9 @@ public class UserServlet extends HttpServlet {
         String body = req.getReader()
                 .lines()
                 .collect(Collectors.joining(System.lineSeparator()));
-        UserRequestDto userRequestDto = gson.fromJson(body, UserRequestDto.class);
-        UserResponseDto userResponseDto = userService.createUser(userRequestDto);
-        String gsonString = gson.toJson(userResponseDto);
+        GroupRequestDto groupRequestDto = gson.fromJson(body, GroupRequestDto.class);
+        GroupResponseDto groupResponseDto = groupService.createGroup(groupRequestDto);
+        String gsonString = gson.toJson(groupResponseDto);
         resp.getWriter().write(gsonString);
     }
 
@@ -104,15 +103,15 @@ public class UserServlet extends HttpServlet {
 
         var mapping = req.getHttpServletMapping();
         String gsonString = "Invalid URL";
-        if (mapping.getPattern().equals("/users/*")) {
-            Integer userId = Integer.parseInt(mapping.getMatchValue());
+        if (mapping.getPattern().equals("/groups/*")) {
+            Integer groupId = Integer.parseInt(mapping.getMatchValue());
             String body = req.getReader()
                     .lines()
                     .collect(Collectors.joining(System.lineSeparator()));
-            UserRequestDto userRequestDto = gson.fromJson(body, UserRequestDto.class);
+            GroupRequestDto groupRequestDto = gson.fromJson(body, GroupRequestDto.class);
             try {
-                UserResponseDto userResponseDto = userService.updateUser(userId, userRequestDto);
-                gsonString = gson.toJson(userResponseDto);
+                GroupResponseDto groupResponseDto = groupService.updateGroup(groupId, groupRequestDto);
+                gsonString = gson.toJson(groupResponseDto);
             } catch (NotFoundException e) {
                 resp.sendError(404, e.getMessage());
             }
