@@ -5,6 +5,7 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.myapp.dto.UserRequestDto;
 import ru.myapp.dto.UserResponseDto;
 import ru.myapp.dto.UserResponseDtoShort;
+import ru.myapp.error.BadRequestException;
 import ru.myapp.error.NotFoundException;
 import ru.myapp.mappers.UserMapper;
 import ru.myapp.model.Group;
@@ -95,6 +96,9 @@ public class UserServiceImpl implements UserService {
         Set<Group> groups = user.getGroups();
         Group group = groupRepository.findById(groupId)
                 .orElseThrow(() -> new NotFoundException(String.format("Group id=%s not found", groupId)));
+        if (!groups.contains(group)) {
+            throw new BadRequestException((String.format("User id=%s is not in the group id%s", userId, groupId)));
+        }
         groups.remove(group);
         userRepository.save(user);
         return userMapper.userToUserResponseDto(user);

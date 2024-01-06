@@ -31,4 +31,13 @@ public class ErrorHandler {
                 HttpStatus.NOT_FOUND.toString(),
                 LocalDateTime.now().format(DATE_TIME_FORMATTER));
     }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ApiError handleBadRequestException(final BadRequestException e) {
+        return new ApiError("The request is incorrect.",
+                e.getMessage(),
+                HttpStatus.BAD_REQUEST.toString(),
+                LocalDateTime.now().format(DATE_TIME_FORMATTER));
+    }
 }
