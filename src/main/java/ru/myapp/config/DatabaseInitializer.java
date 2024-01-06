@@ -21,8 +21,6 @@ public class DatabaseInitializer {
 
     @PostConstruct
     public void initializeDatabase() throws SQLException {
-//        Resource schema = new ClassPathResource("schema.sql");
-//        executeScript(schema);
         Resource data = new ClassPathResource("data.sql");
         executeScript(data);
     }
