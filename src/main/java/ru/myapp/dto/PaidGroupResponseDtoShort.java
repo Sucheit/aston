@@ -1,6 +1,6 @@
 package ru.myapp.dto;
 
-public record PaidGroupResponseDtoShort(Integer groupId,
+public record PaidGroupResponseDtoShort(Integer id,
 
                                         String name,
 

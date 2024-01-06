@@ -10,6 +10,6 @@
 <body>
 <h3>WELCOME TO MY APP</h3><br>
 <strong>Current Time is</strong>: <%=new Date() %>
-<h2>Check out /api for endpoints</h2>
+
 </body>
 </html>
