@@ -7,6 +7,7 @@ import java.util.Objects;
 import java.util.Set;
 
 
+@Cacheable
 @Entity
 @Table(name = "groups")
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)

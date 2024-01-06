@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
+@Cacheable
 @Entity
 @Table(name = "users")
 public class User {

@@ -71,6 +71,9 @@ public class RootConfig {
         properties.setProperty("hibernate.show_sql", hibernateShowSql);
         properties.setProperty("format_sql", hibernateFormatSql);
         properties.setProperty("hibernate.hbm2ddl.auto", hibernateDDLAuto);
+        properties.setProperty("hibernate.cache.use_second_level_cache", "true");
+        properties.setProperty("hibernate.cache.use_query_cache", "hibernate.cache.use_query_cache");
+        properties.setProperty("hibernate.cache.region.factory_class", "org.hibernate.cache.jcache.JCacheRegionFactory");
         return properties;
     }
 
@@ -85,4 +88,5 @@ public class RootConfig {
     public JdbcTemplate jdbcTemplate() {
         return new JdbcTemplate(dataSource());
     }
+
 }
