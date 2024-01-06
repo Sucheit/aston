@@ -1,6 +1,6 @@
 package ru.myapp.dto;
 
-public record UserResponseDtoShort(String userId,
+public record UserResponseDtoShort(Integer userId,
                                    String firstName,
                                    String lastName) {
 }

@@ -1,7 +1,7 @@
-insert into groups (name, description)
-values ('group1', 'group1desc1');
-insert into groups (name, description)
-values ('group2', 'group2desc2');
+insert into groups (group_type, name, description)
+values ('group', 'group1', 'group1desc1');
+insert into groups (group_type, name, description, cost)
+values ('paid_group', 'group2', 'group2desc2', 99);
 
 
 insert into users (first_name, last_name)

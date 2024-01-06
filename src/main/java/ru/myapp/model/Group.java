@@ -9,7 +9,9 @@ import java.util.Set;
 
 @Entity
 @Table(name = "groups")
-@Inheritance(strategy = InheritanceType.JOINED)
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@DiscriminatorValue("group")
+@DiscriminatorColumn(name = "group_type", discriminatorType = DiscriminatorType.STRING)
 public class Group {
 
     @Id

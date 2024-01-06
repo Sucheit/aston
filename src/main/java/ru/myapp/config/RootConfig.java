@@ -44,6 +44,9 @@ public class RootConfig {
     @Value("${spring.jpa.properties.hibernate.format_sql}")
     private String hibernateFormatSql;
 
+    @Value("${hibernate.hbm2ddl.auto}")
+    private String hibernateDDLAuto;
+
     @Bean
     public DataSource dataSource() {
         DriverManagerDataSource dataSource = new DriverManagerDataSource();
@@ -69,6 +72,7 @@ public class RootConfig {
         properties.setProperty("hibernate.dialect", hibernateDialect);
         properties.setProperty("hibernate.show_sql", hibernateShowSql);
         properties.setProperty("format_sql", hibernateFormatSql);
+        properties.setProperty("hibernate.hbm2ddl.auto", hibernateDDLAuto);
         return properties;
     }
 

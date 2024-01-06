@@ -4,7 +4,7 @@ import java.time.format.DateTimeFormatter;
 
 public class Constants {
 
-    public Constants() {
+    private Constants() {
         throw new RuntimeException();
     }
 

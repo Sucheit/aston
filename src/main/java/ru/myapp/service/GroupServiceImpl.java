@@ -5,6 +5,7 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.myapp.dto.GroupRequestDto;
 import ru.myapp.dto.GroupResponseDto;
 import ru.myapp.dto.GroupResponseDtoShort;
+import ru.myapp.dto.PaidGroupResponseDtoShort;
 import ru.myapp.error.NotFoundException;
 import ru.myapp.mappers.GroupMapper;
 import ru.myapp.model.Group;
@@ -64,5 +65,10 @@ public class GroupServiceImpl implements GroupService {
         groupRepository.findById(groupId)
                 .orElseThrow(() -> new NotFoundException(String.format("Group id=%s not found", groupId)));
         groupRepository.deleteById(groupId);
+    }
+
+    @Override
+    public List<PaidGroupResponseDtoShort> getPaidGroups() {
+        return groupMapper.paidGroupsListToPaidGroupResponseDtoList(groupRepository.findAllPaidGroups());
     }
 }
